@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Scene 360° Photo Gallery</title>
-    <!-- Use Google Fonts for a clean, modern look -->
+    <!-- Use Proxima Nova Fonts for a clean, modern look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden; /* Prevents scrollbars */
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', proxima nova;
             background-color: #000;
         }
         #panorama {
@@ -29,6 +29,14 @@
             left: 0;
             z-index: 10;
         }
+        /* Styling for the logo */
+        #logo-container {
+            position: absolute;
+            bottom:20px; 
+            right: 20px; /* Changed from 'left' to 'right' */
+            z-index: 20; /* Make sure it's above the panorama */
+            width: 150px; /* Adjust width as needed */
+        }
         /* Styling for the scene navigation */
         #scene-nav {
             position: absolute;
@@ -36,14 +44,12 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            background-color: rgba(0, 0, 0, 0.7);
             padding: 10px;
             border-radius: 12px;
             display: flex;
             flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .scene-button {
             padding: 8px 16px;
@@ -64,17 +70,20 @@
         .pnlm-load-box {
             border-color: rgba(255, 255, 255, 0.8);
         }
-        .pnlm-title-box, .pnlm-author-box {
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 8px 16px;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
 
 <!-- The container where the 360 photo viewer will be rendered -->
 <div id="panorama"></div>
+
+<!-- Your Logo Here -->
+<div id="logo-container">
+    <!-- IMPORTANT: Replace the src below with the URL to your logo image -->
+    <img src="https://i.postimg.cc/vb8PVhCs/dwp-logo-black-01.png" alt="Your Company Logo" 
+         onerror="this.onerror=null;this.src='https://i.postimg.cc/vb8PVhCs/dwp-logo-black-01.png';">
+</div>
+
 
 <!-- Navigation for switching between scenes -->
 <div id="scene-nav">
@@ -85,32 +94,28 @@
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
 <script>
-    // Define the scenes for your gallery
+    // Define the scenes for your gallery (Title and Author removed)
     const scenes = {
         "bathroom": {
             "title": "Master Walk-in Bathroom",
-            "author": "DWP",
             "panorama": "https://i.postimg.cc/Pdjbc2gV/18-0036-4-BR-MS-Walkin-Bathroom-x.png",
             "autoRotate": -0.5,
             "hfov": 100
         },
         "masterBedroom": {
             "title": "Master Bedroom",
-            "author": "DWP",
             "panorama": "https://i.postimg.cc/9cZ8w4hK/18-0036-4-BR-MS-Bedroom-x.jpg",
             "autoRotate": -1.5,
             "hfov": 110
         },
         "livingRoom": {
             "title": "Bedroom 2",
-            "author": "DWP",
             "panorama": "https://i.postimg.cc/zqFw1T5z/18-0036-4-BR-Bedroom-2-x.jpg",
             "autoRotate": -1,
             "hfov": 100
         },
         "bedroom2": {
             "title": "Living Dining",
-            "author": "DWP",
             "panorama": "https://i.postimg.cc/yKPGTSZz/18-0036-4-BR-Liv-Din-x.jpg",
             "autoRotate": 0.5,
             "hfov": 110
@@ -127,7 +132,8 @@
         },
         "scenes": scenes,
         "autoLoad": true,
-        "type": "equirectangular"
+        "type": "equirectangular",
+        "showControls": true // Ensure controls are on by default
     });
 
     // Function to switch scenes
@@ -146,7 +152,8 @@
     // Dynamically create navigation buttons from the scenes object
     Object.keys(scenes).forEach(sceneKey => {
         const button = document.createElement('button');
-        button.innerText = scenes[sceneKey].title;
+        // Use the title from the scene object for the button text
+        button.innerText = scenes[sceneKey].title || sceneKey;
         button.classList.add('scene-button');
         if (sceneKey === currentScene) {
             button.classList.add('active');
