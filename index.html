@@ -18,7 +18,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden; /* Prevents scrollbars */
-            font-family: 'Inter', proxima nova;
+            font-family: 'Inter', sans-serif;
             background-color: #000;
         }
         #panorama {
@@ -32,10 +32,14 @@
         /* Styling for the logo */
         #logo-container {
             position: absolute;
-            bottom:20px; 
-            right: 20px; /* Changed from 'left' to 'right' */
+            bottom: 20px; 
+            right: 20px;
             z-index: 20; /* Make sure it's above the panorama */
             width: 150px; /* Adjust width as needed */
+        }
+        #logo-container img {
+            width: 100%;
+            height: auto;
         }
         /* Styling for the scene navigation */
         #scene-nav {
@@ -54,12 +58,13 @@
         .scene-button {
             padding: 8px 16px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.5); /* slightly darker for better contrast */
             color: white;
             cursor: pointer;
             border-radius: 8px;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
             font-weight: 500;
+            backdrop-filter: blur(4px);
         }
         .scene-button:hover, .scene-button.active {
             background-color: rgba(255, 255, 255, 0.9);
@@ -79,11 +84,9 @@
 
 <!-- Your Logo Here -->
 <div id="logo-container">
-    <!-- IMPORTANT: Replace the src below with the URL to your logo image -->
     <img src="https://i.postimg.cc/vb8PVhCs/dwp-logo-black-01.png" alt="Your Company Logo" 
          onerror="this.onerror=null;this.src='https://i.postimg.cc/vb8PVhCs/dwp-logo-black-01.png';">
 </div>
-
 
 <!-- Navigation for switching between scenes -->
 <div id="scene-nav">
@@ -94,46 +97,52 @@
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
 <script>
-    // Define the scenes for your gallery (Title and Author removed)
+    // FIX: Given unique keys to each scene object (Reception1, Reception2, etc.)
+    // FIX: Added "type": "equirectangular" to each scene config
     const scenes = {
-        "Reception": {
-            "title": "Reception1",
+        "Reception1": {
+            "title": "Reception 1",
+            "type": "equirectangular",
             "panorama": "https://i.postimg.cc/GbZhRmt0/Pano-1.jpg",
             "autoRotate": -0.5,
             "hfov": 100
         },
-        "Reception": {
-            "title": "Reception2",
+        "Reception2": {
+            "title": "Reception 2",
+            "type": "equirectangular",
             "panorama": "https://i.postimg.cc/JR948z0M/Pano-2.jpg",
             "autoRotate": -1.5,
             "hfov": 110
         },
-         "Reception": {
-            "title": "Reception1opt2",
-            "panorama": "https://i.postimg.cc/9VrmD99Z/PANO-OPTION-1-1.jpg",
+        "Reception1opt2": {
+            "title": "Reception 1 (Opt 2)",
+            "type": "equirectangular",
+            "panorama": "https://i.postimg.cc/37VKmwjZ/PANO-OPTION-1-2.jpg",
             "autoRotate": -1.5,
             "hfov": 110
         },
-        "Reception": {
-            "title": "Reception2opt2",
-            "panorama": "https://i.postimg.cc/37VKmwjZ/PANO-OPTION-1-2.jpg",
+        "Reception2opt2": {
+            "title": "Reception 2 (Opt 2)",
+            "type": "equirectangular",
+            "panorama": "https://i.postimg.cc/9VrmD99Z/PANO-OPTION-1-1.jpg",
             "autoRotate": -1.5,
             "hfov": 110
         }
     };
 
-    let currentScene = "bathroom"; // The default scene to load first
+    // FIX: Updated the initial scene to match an exact key from the dictionary above
+    let currentScene = "Reception1"; 
     const navContainer = document.getElementById('scene-nav');
 
     // Initialize the viewer with all scenes at once
     const viewer = pannellum.viewer('panorama', {
         "default": {
             "firstScene": currentScene,
+            "autoLoad": true,
+            "showControls": true,
+            "sceneFadeDuration": 1000 // Smooth crossfade transition between scenes
         },
-        "scenes": scenes,
-        "autoLoad": true,
-        "type": "equirectangular",
-        "showControls": true // Ensure controls are on by default
+        "scenes": scenes
     });
 
     // Function to switch scenes
@@ -145,7 +154,11 @@
 
         // Update active button style
         document.querySelectorAll('.scene-button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.scene === sceneName);
+            if (btn.dataset.scene === sceneName) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         });
     }
 
@@ -167,9 +180,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
