@@ -71,9 +71,41 @@
             color: #111;
             border-color: rgba(255, 255, 255, 0.9);
         }
+        /* Styling for the top controls */
+        #top-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+        }
+        .top-btn {
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .top-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border-color: rgba(255, 255, 255, 0.9);
+        }
         /* Customizing Pannellum controls */
         .pnlm-load-box {
             border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Hide Pannellum default title and author text at bottom left */
+        .pnlm-title-box, .pnlm-author-box {
+            display: none !important;
         }
     </style>
 </head>
@@ -81,6 +113,71 @@
 
 <!-- The container where the 360 photo viewer will be rendered -->
 <div id="panorama"></div>
+
+<!-- Top Left Controls -->
+<div id="top-controls">
+    <!-- Upload Button -->
+    <button id="upload-btn" class="top-btn" title="Upload 360 Image">
+        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+    </button>
+    <!-- Gallery Button -->
+    <button id="gallery-btn" class="top-btn" title="Manage Gallery">
+        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+    </button>
+</div>
+
+<!-- Gallery Lightbox Modal -->
+<div id="gallery-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-11/12 max-w-md text-white text-center shadow-2xl relative max-h-[90vh] flex flex-col">
+        <button id="close-gallery-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h2 class="text-xl font-bold mb-4">Manage Gallery</h2>
+        <div id="gallery-list" class="flex-1 overflow-y-auto space-y-2 text-left min-h-[150px]">
+            <!-- Items injected via JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Upload Lightbox Modal -->
+<div id="upload-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-11/12 max-w-md text-white text-center shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button id="close-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h2 class="text-xl font-bold mb-2">Upload 360° Photo</h2>
+        <p class="text-sm text-yellow-400 mb-4 font-medium">Refresh after add image</p>
+        
+        <!-- URL Input Section -->
+        <div class="mb-4">
+            <p class="text-sm text-gray-400 mb-2">Paste Image URL</p>
+            <div class="flex gap-2">
+                <input type="text" id="url-input" placeholder="https://i.postimg.cc/..." class="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                <button id="add-url-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition">Add</button>
+            </div>
+        </div>
+        
+        <!-- Postimages.org Link Section -->
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-sm text-gray-400 mb-3">Need to host your image online? <span id="how-to-toggle" class="text-blue-500 font-bold cursor-pointer hover:underline">How to</span></p>
+            
+            <!-- Hidden Tutorial Instructions -->
+            <div id="how-to-guide" class="hidden text-left text-sm text-gray-300 mb-4 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>Go to <strong>My Gallery</strong> on Postimages.</li>
+                    <li>Click on your uploaded panorama image.</li>
+                    <li>Right-click the image and select <strong>"Open image in new tab"</strong>.</li>
+                    <li>Copy the direct URL from the address bar (looks like <code>https://i.postimg.cc/...</code>) and paste it above.</li>
+                </ol>
+            </div>
+
+            <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition w-full sm:w-auto">
+                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                Open Postimages.org
+            </a>
+        </div>
+    </div>
+</div>
 
 <!-- Your Logo Here -->
 <div id="logo-container">
@@ -96,10 +193,13 @@
 <!-- Include Pannellum library JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
-<script>
-    // FIX: Given unique keys to each scene object (Reception1, Reception2, etc.)
-    // FIX: Added "type": "equirectangular" to each scene config
-    const scenes = {
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- State Management (Cloud Storage) ---
+    const defaultScenes = {
         "Reception1": {
             "title": "Reception 1",
             "type": "equirectangular",
@@ -113,32 +213,167 @@
             "panorama": "https://i.postimg.cc/Z4L8dZPV/360-lobby2.jpg",
             "autoRotate": -1.5,
             "hfov": 110
+        },
+        "PANO-1": {
+            "title": "PANO-1",
+            "type": "equirectangular",
+            "panorama": "https://i.postimg.cc/nZPHcbCS/PANO-1.jpg",
+            "autoRotate": -0.5,
+            "hfov": 100
         }
     };
 
-    // FIX: Updated the initial scene to match an exact key from the dictionary above
-    let currentScene = "Reception1"; 
-    const navContainer = document.getElementById('scene-nav');
+    let scenes = {...defaultScenes};
+    let sceneOrder = Object.keys(scenes);
+    let currentScene = "PANO-1"; 
+    let viewer = null;
+    let isViewerInit = false;
 
-    // Initialize the viewer with all scenes at once
-    const viewer = pannellum.viewer('panorama', {
-        "default": {
-            "firstScene": currentScene,
-            "autoLoad": true,
-            "showControls": true,
-            "sceneFadeDuration": 1000 // Smooth crossfade transition between scenes
-        },
-        "scenes": scenes
+    // Elements
+    const navContainer = document.getElementById('scene-nav');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadModal = document.getElementById('upload-modal');
+    const closeModal = document.getElementById('close-modal');
+    const howToToggle = document.getElementById('how-to-toggle');
+    const howToGuide = document.getElementById('how-to-guide');
+    const urlInput = document.getElementById('url-input');
+    const addUrlBtn = document.getElementById('add-url-btn');
+    const galleryBtn = document.getElementById('gallery-btn');
+    const galleryModal = document.getElementById('gallery-modal');
+    const closeGalleryModal = document.getElementById('close-gallery-modal');
+    const galleryList = document.getElementById('gallery-list');
+
+    // --- Firebase Initialization ---
+    let db, auth, appId, configDocRef;
+    const hasFirebase = typeof __firebase_config !== 'undefined';
+
+    if (hasFirebase) {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'galleryConfig', 'main');
+
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) return;
+            
+            // Listen for Realtime Cloud Updates
+            onSnapshot(configDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    scenes = data.scenes || {...defaultScenes};
+                    sceneOrder = data.sceneOrder || Object.keys(scenes);
+                    currentScene = data.currentScene || sceneOrder[0];
+                } else {
+                    // First time save to cloud
+                    setDoc(configDocRef, { scenes, sceneOrder, currentScene });
+                }
+                initOrUpdateApp();
+            }, (error) => {
+                console.error("Firestore Error:", error);
+                initOrUpdateApp(); 
+            });
+        });
+    } else {
+        // Fallback for running outside the preview platform
+        initOrUpdateApp();
+    }
+
+    async function saveState() {
+        if (hasFirebase && auth && auth.currentUser) {
+            await setDoc(configDocRef, { scenes, sceneOrder, currentScene });
+        }
+    }
+
+    function initOrUpdateApp() {
+        // Fallback if current scene was previously deleted
+        if (!scenes[currentScene] && sceneOrder.length > 0) {
+            currentScene = sceneOrder[0];
+        }
+
+        if (!isViewerInit) {
+            viewer = pannellum.viewer('panorama', {
+                "default": {
+                    "firstScene": currentScene,
+                    "autoLoad": true,
+                    "showControls": true,
+                    "showTitle": false,
+                    "showAuthor": false,
+                    "sceneFadeDuration": 1000
+                },
+                "scenes": scenes
+            });
+            isViewerInit = true;
+        }
+        
+        renderNav();
+        if (!galleryModal.classList.contains('hidden')) {
+            renderGalleryList();
+        }
+    }
+
+    // --- Core Logic & Event Listeners ---
+
+    // Toggle How To Guide
+    howToToggle.addEventListener('click', () => {
+        howToGuide.classList.toggle('hidden');
     });
 
-    // Function to switch scenes
+    uploadBtn.addEventListener('click', () => uploadModal.classList.remove('hidden'));
+    closeModal.addEventListener('click', () => uploadModal.classList.add('hidden'));
+    uploadModal.addEventListener('click', (e) => { if(e.target === uploadModal) uploadModal.classList.add('hidden'); });
+
+    // Add Scene via URL Button
+    addUrlBtn.addEventListener('click', () => {
+        const url = urlInput.value.trim();
+        if (url) {
+            let imageName = url.split('/').pop().split('.')[0] || 'New Scene';
+            try { imageName = decodeURIComponent(imageName); } catch(e) {}
+            
+            addSceneFromData(url, imageName);
+            urlInput.value = ''; 
+        }
+    });
+
+    function addSceneFromData(dataUrl, defaultTitle) {
+        const sceneId = 'Scene_' + Date.now();
+        
+        scenes[sceneId] = {
+            "title": defaultTitle,
+            "type": "equirectangular",
+            "panorama": dataUrl,
+            "autoRotate": -0.5,
+            "hfov": 100
+        };
+        sceneOrder.push(sceneId);
+
+        viewer.addScene(sceneId, scenes[sceneId]);
+
+        saveState(); // Sync to cloud
+        renderNav();
+
+        uploadModal.classList.add('hidden');
+        switchScene(sceneId);
+    }
+
     function switchScene(sceneName) {
-        if (sceneName === currentScene) return; // Don't reload if it's the same scene
+        if (sceneName === currentScene) return; 
 
         currentScene = sceneName;
+        saveState(); // Sync to cloud
         viewer.loadScene(sceneName);
 
-        // Update active button style
         document.querySelectorAll('.scene-button').forEach(btn => {
             if (btn.dataset.scene === sceneName) {
                 btn.classList.add('active');
@@ -148,21 +383,173 @@
         });
     }
 
-    // Dynamically create navigation buttons from the scenes object
-    Object.keys(scenes).forEach(sceneKey => {
-        const button = document.createElement('button');
-        // Use the title from the scene object for the button text
-        button.innerText = scenes[sceneKey].title || sceneKey;
-        button.classList.add('scene-button');
-        if (sceneKey === currentScene) {
-            button.classList.add('active');
-        }
-        button.dataset.scene = sceneKey; // Store scene key in data attribute
-        button.onclick = () => switchScene(sceneKey);
-        navContainer.appendChild(button);
+    function renderNav() {
+        navContainer.innerHTML = '';
+        sceneOrder.forEach(sceneKey => {
+            const button = document.createElement('button');
+            button.innerText = scenes[sceneKey].title || sceneKey;
+            button.classList.add('scene-button');
+            if (sceneKey === currentScene) {
+                button.classList.add('active');
+            }
+            button.dataset.scene = sceneKey;
+            button.onclick = () => switchScene(sceneKey);
+            navContainer.appendChild(button);
+        });
+    }
+
+    // --- Gallery Modal Logic ---
+    galleryBtn.addEventListener('click', () => {
+        renderGalleryList();
+        galleryModal.classList.remove('hidden');
     });
+    closeGalleryModal.addEventListener('click', () => galleryModal.classList.add('hidden'));
+    galleryModal.addEventListener('click', (e) => { if(e.target === galleryModal) galleryModal.classList.add('hidden'); });
+
+    function renderGalleryList() {
+        galleryList.innerHTML = '';
+        if (sceneOrder.length === 0) {
+            galleryList.innerHTML = '<p class="text-gray-500 text-center py-4">No images in gallery.</p>';
+            return;
+        }
+
+        sceneOrder.forEach((sceneId, index) => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between bg-gray-800 p-3 rounded border border-gray-700';
+            
+            // Title Container
+            const titleContainer = document.createElement('div');
+            titleContainer.className = 'flex-1 pr-2 flex items-center overflow-hidden';
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'truncate font-medium ' + (sceneId === currentScene ? 'text-blue-400' : 'text-white');
+            titleSpan.innerText = scenes[sceneId].title || sceneId;
+
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'hidden flex-1 bg-gray-700 text-white px-2 py-1 rounded border border-gray-500 text-sm focus:outline-none focus:border-blue-500 w-full mr-2';
+            titleInput.value = scenes[sceneId].title || sceneId;
+            
+            titleContainer.appendChild(titleSpan);
+            titleContainer.appendChild(titleInput);
+            
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'flex items-center gap-1 shrink-0';
+
+            // Edit / Rename
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-1 text-gray-400 hover:text-white transition-colors';
+            editBtn.innerHTML = '<svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>';
+            
+            let isEditing = false;
+            editBtn.onclick = () => {
+                if (!isEditing) {
+                    isEditing = true;
+                    titleSpan.classList.add('hidden');
+                    titleInput.classList.remove('hidden');
+                    titleInput.focus();
+                    editBtn.innerHTML = '<svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    editBtn.classList.replace('text-gray-400', 'text-green-400');
+                    editBtn.classList.replace('hover:text-white', 'hover:text-green-300');
+                } else {
+                    isEditing = false;
+                    const newTitle = titleInput.value.trim() || sceneId;
+                    scenes[sceneId].title = newTitle;
+                    
+                    saveState(); // Sync to cloud
+                    renderGalleryList();
+                    renderNav();
+                }
+            };
+
+            // Allow hitting Enter to save
+            titleInput.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    editBtn.click();
+                }
+            };
+
+            // Move Up
+            const upBtn = document.createElement('button');
+            upBtn.className = 'p-1 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed';
+            upBtn.innerHTML = '<svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+            upBtn.disabled = index === 0;
+            upBtn.onclick = () => {
+                [sceneOrder[index - 1], sceneOrder[index]] = [sceneOrder[index], sceneOrder[index - 1]];
+                saveState(); // Sync to cloud
+                renderGalleryList();
+                renderNav();
+            };
+
+            // Move Down
+            const downBtn = document.createElement('button');
+            downBtn.className = 'p-1 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed';
+            downBtn.innerHTML = '<svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+            downBtn.disabled = index === sceneOrder.length - 1;
+            downBtn.onclick = () => {
+                [sceneOrder[index + 1], sceneOrder[index]] = [sceneOrder[index], sceneOrder[index + 1]];
+                saveState(); // Sync to cloud
+                renderGalleryList();
+                renderNav();
+            };
+
+            // Delete (with iframe-safe two-click confirmation)
+            const delBtn = document.createElement('button');
+            if (sceneOrder.length <= 1) {
+                delBtn.className = 'p-1 text-gray-600 cursor-not-allowed ml-1';
+                delBtn.disabled = true;
+            } else {
+                delBtn.className = 'p-1 text-red-400 hover:text-red-300 ml-1 transition-all';
+            }
+            delBtn.innerHTML = '<svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+            
+            delBtn.onclick = () => {
+                if (delBtn.classList.contains('confirming')) {
+                    deleteScene(sceneId);
+                } else {
+                    delBtn.classList.add('confirming', 'bg-red-900', 'text-white', 'px-2', 'rounded', 'text-xs', 'font-bold');
+                    delBtn.innerHTML = 'Sure?';
+                    setTimeout(() => {
+                        delBtn.classList.remove('confirming', 'bg-red-900', 'text-white', 'px-2', 'rounded', 'text-xs', 'font-bold');
+                        delBtn.innerHTML = '<svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+                    }, 3000);
+                }
+            };
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(upBtn);
+            actionsDiv.appendChild(downBtn);
+            actionsDiv.appendChild(delBtn);
+
+            item.appendChild(titleContainer);
+            item.appendChild(actionsDiv);
+            galleryList.appendChild(item);
+        });
+    }
+
+    function deleteScene(sceneId) {
+        if (sceneOrder.length <= 1) return; 
+
+        // If deleting the active scene, switch to a different one first
+        if (currentScene === sceneId) {
+            const nextSceneId = sceneOrder.find(id => id !== sceneId);
+            switchScene(nextSceneId);
+            
+            setTimeout(() => {
+                try { viewer.removeScene(sceneId); } catch(e) { console.warn(e); }
+            }, 1200);
+        } else {
+            try { viewer.removeScene(sceneId); } catch(e) { console.warn(e); }
+        }
+
+        sceneOrder = sceneOrder.filter(id => id !== sceneId);
+        delete scenes[sceneId];
+        
+        saveState(); // Sync deletion to cloud permanently 
+        renderGalleryList();
+        renderNav();
+    }
 
 </script>
-
 </body>
 </html>
